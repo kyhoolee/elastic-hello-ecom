@@ -1,0 +1,131 @@
+  Prepare product data 
+
+  {
+  	"productId": "6223832",
+  	"category": "\u0110\u1ed3 m\u1eb7c nh\u00e0, \u0111\u1ed3 ng\u1ee7 trung ni\u00ean",
+  	"title": "B\u1ed9 \u0111\u1ed3 Hoa t\u1eb7ng B\u00e0 6223832 - gi\u1ea3m 20%",
+  	"description": "\n\" CON Y\u00caU M\u1eb8 \" , \" CH\u00c1U Y\u00caU B\u00c0 \"\ud83d\udc9f\u00a0C\u00f3 v\u00f4 v\u00e0n c\u00e1ch \u0111\u1ec3 ch\u00fang ta th\u1ec3 hi\u1ec7n t\u00ecnh c\u1ea3m v\u1edbi nh\u1eefng ng\u01b0\u1eddi m\u1eb9, ng\u01b0\u1eddi b\u00e0 \u0111\u00e1ng k\u00ednh !\ud83c\udf81M\u1ed9t trong nh\u1eefng c\u00e1ch \u1ea5y l\u00e0 bi\u1ebfu b\u00e0 , bi\u1ebfu m\u1eb9 nh\u1eefng b\u1ed9 qu\u1ea7n \u00e1o \u0111\u01a1n gi\u1ea3n nh\u01b0ng l\u1ea1i \u0111\u1ea7y sang tr\u1ea1ng, g\u1eedi g\u1eafm t\u00ecnh c\u1ea3m c\u1ee7a m\u00ecnh t\u1edbi nh\u1eefng m\u00f3n qu\u00e0 nh\u1ecf b\u00e9 nh\u01b0ng \u0111\u1ea7y t\u00ecnh y\u00eau th\u01b0\u01a1ng \u0111\u00f3 !#VincentFashion\u00a0th\u1ea5u hi\u1ec3u \u0111i\u1ec1u \u0111\u00f3 n\u00ean \u0111\u00e3 nh\u1eadp v\u1ec1 r\u1ea5t nhi\u1ec1u m\u1eabu qu\u1ea7n \u00e1o ch\u1ea5t si\u00eau \u0111\u1eb9p , m\u1ec1m m\u1ecbn l\u1ea1i c\u1ef1c m\u00e1t,v\u00f4 c\u00f9ng h\u1ee3p v\u1edbi c\u00e1c m\u1eb9, b\u00e0.\u27a1Anh ch\u1ecb h\u00e3y LI\u00caN H\u1ec6 ngay v\u1edbi Vincent Fashion \u0111\u1ec3 \u0111\u01b0\u1ee3c t\u01b0 v\u1ea5n nh\u1eefng m\u00f3n qu\u00e0 \u00fd ngh\u0129a d\u00e0nh t\u1eb7ng M\u1eb8 v\u00e0 B\u00c0 !\u27a1\u0110i \u0111\u00e2u,, mua h\u00e0ng online t\u1ea1i Sendo.vn, giao h\u00e0ng t\u1eadn n\u01a1i, mi\u1ec5n ph\u00ed v\u1eadn chuy\u1ec3n, s\u1ea3n ph\u1ea9m  ch\u1ea5t l\u01b0\u1ee3ng, 6223832",
+  	"price": 368000.0
+  }
+
+
+  Insert data and 'feel' the search result
+
+  Dealing the product-id name inside the query
+
+  Dealing the synonym. Ex: 'ao thun' ~ 'ao phong', 'váy' ~ 'đầm'
+
+  Accent stemmer in Vietnamese 
+
+{
+	"settings": {
+		"analysis": {
+			"filter": {
+				"my_synonym_filter": {
+					"type": "synonym",
+					"synonyms": ["váy,đầm", "áo thun,áo phông"]
+				}
+			},
+			"analyzer": {
+				"my_synonyms": {
+					"tokenizer": "standard",
+					"filter": ["lowercase", "my_synonym_filter"]
+				},
+				"folding": {
+					"tokenizer": "standard",
+					"filter": ["lowercase", "asciifolding"]
+				},
+				"folding_synonyms": {
+					"tokenizer": "standard",
+					"filter": ["lowercase", "my_synonym_filter", "asciifolding"]
+				}
+			}
+		}
+	},
+	"mappings": {
+		"product": {
+			"properties": {
+				"title": {
+					"type": "string",
+					"analyzer": "standard",
+					"fields": {
+						"folded_synonym": {
+							"type": "string",
+							"analyzer": "folding_synonyms"
+						},
+						"folded": {
+							"type": "string",
+							"analyzer": "folding"
+						}
+					}
+				},
+				"category": {
+					"search_analyzer": "standard",
+					"analyzer": "my_synonyms",
+					"type": "string"
+				},
+				"description": {
+					"type": "string",
+					"analyzer": "my_synonyms"
+				}
+			}
+		}
+	}
+}
+
+  Dealing the score: exact_analyzer > synonym_analyzer, normalized_analyzer
+
+  Sort with price
+
+{
+	"query": {
+		"bool": {
+			"should": [{
+					"match": {
+						"title": "váy"
+					}
+				},
+				{
+					"match": {
+						"title.folded_synonym": "vay"
+					}
+				}
+			]
+		}
+	},
+	"sort": {
+		"price": {
+			"order": "desc"
+		}
+	}
+}
+
+
+  Adding hot_buy field --> number of buy today
+
+  Control score: score = true_word + 1/2 synonym + 1/2 hot_buy + 1/2 price_order + 1/2 user_related + ...
+
+{
+	"query": {
+		"function_score": {
+			"query": {
+				"bool": {
+					"should": [{
+							"match": {
+								"title": "váy"
+							}
+						},
+						{
+							"match": {
+								"title.folded_synonym": "vay"
+							}
+						}
+					]
+				}
+			},
+			"script_score": {
+				"script": "_score + (100000.0 / doc['price'].value)"
+			}
+		}
+	}
+}

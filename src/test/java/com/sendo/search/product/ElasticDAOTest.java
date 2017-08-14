@@ -12,13 +12,13 @@ public class ElasticDAOTest {
 
 	public static void main(String[] args) {
 		// deleteProduct();
-		// insertProduct();
+		//insertProduct();
 		// insertProductByFile();
 		// System.out.println("---");
-		//getProduct();
+		getProduct();
 		// System.out.println("\u00a5123");
 		//updateSynonym();
-		searchProduct();
+		//searchProduct();
 		// getProduct("6555126");
 		// updateProduct("6555126");
 	}
