@@ -129,3 +129,170 @@
 		}
 	}
 }
+
+  
+  Boost field: adding-score with boost-factor
+
+{
+  "query": {
+    "bool": {
+      "should": [
+        {
+          "match": {
+            "description": {
+              "query": "váy",
+              "boost": 3
+            }
+          }
+        },
+        {
+          "match": {
+            "title": {
+              "query": "váy",
+              "boost": 1
+            }
+          }
+        },
+        {
+          "match": {
+            "title.folded_synonym": "đầm"
+          }
+        }
+      ]
+    }
+  }
+}
+
+
+  Dis_max score: choosing max-score between fields
+  tie_breaker: using for normalize between dis_max and sum
+
+{
+  "query": {
+    "dis_max": {
+      "queries": [
+        {
+          "bool": {
+            "should": [
+              {
+                "match": {
+                  "title": {
+                    "query": "váy",
+                    "boost": 1
+                  }
+                }
+              },
+              {
+                "match": {
+                  "title.folded_synonym": "đầm"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "match": {
+            "description": {
+              "query": "vay"
+            }
+          }
+        }
+      ],
+      "tie_breaker": 0.5
+    }
+  }
+}
+
+{
+  "query": {
+    "dis_max": {
+      "queries": [
+        {
+          "bool": {
+            "should": [
+              {
+                "match": {
+                  "description": {
+                    "query": "váy",
+                    "boost": 3
+                  }
+                }
+              },
+              {
+                "match": {
+                  "title": {
+                    "query": "váy",
+                    "boost": 1
+                  }
+                }
+              },
+              {
+                "match": {
+                  "title.folded_synonym": "đầm"
+                }
+              }
+            ],
+            "filter": [
+              {
+                "range": {
+                  "price": {
+                    "lte": "250000",
+                    "gte": 150000
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "match": {
+            "description": {
+              "query": "vay",
+              "minimum_should_match": "30%"
+            }
+          }
+        }
+      ],
+      "tie_breaker": 0.3
+    }
+  }
+}
+
+
+
+  Boost field only if satisfying a condition - Ex: minimum_shold_match condition	
+  --> Using must as AND condition and Boost for this case
+
+{
+  "query": {
+    "bool": {
+      "should": [
+        {
+          "bool": {
+            "must": [
+              {
+                "match": {
+                  "title": "váy hoa maxi"
+                }
+              }
+            ],
+            "boost": 5
+          }
+        },
+        {
+          "match": {
+            "title": "vay"
+          }
+        },
+        {
+          "match": {
+            "title.folded_synonym": {
+              "query": "vay",
+              "boost": 1
+            }
+          }
+        }
+      ]
+    }
+  }
+}
