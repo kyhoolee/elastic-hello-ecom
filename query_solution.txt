@@ -296,3 +296,41 @@
     }
   }
 }
+
+
+{
+  "query": {
+    "bool": {
+      "should": [
+        {
+          "bool": {
+            "must": [
+              {
+                "match": {
+                  "title": {
+                    "query": "váy hoa maxi",
+                    "minimum_should_match": "100%"
+                  }
+                }
+              },
+              {
+                "match": {
+                  "brand": 2
+                }
+              }
+            ],
+            "boost": 1.5
+          }
+        },
+        {
+          "match": {
+            "title.folded_synonym": {
+              "query": "ao thun",
+              "boost": 1
+            }
+          }
+        }
+      ]
+    }
+  }
+}

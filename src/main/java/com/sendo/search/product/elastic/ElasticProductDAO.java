@@ -179,12 +179,30 @@ public class ElasticProductDAO {
 	public void updateProduct(Product p) {
 		UpdateRequest updateRequest = new UpdateRequest(Constant.index,
 				Constant.product_type, p.getProductId()).doc(mapper.toJson(p));
+		System.out.println(mapper.toJson(p));
 		try {
 			UpdateResponse r = client.update(updateRequest).get();
 			// System.out.println(r.getIndex());
 			// System.out.println(r.getType());
 			// System.out.println(r.getVersion());
 			// System.out.println(r.getGetResult());
+
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		} catch (ExecutionException e) {
+			e.printStackTrace();
+		}
+	}
+	public void updateScoreProduct(ScoreProduct p) {
+		UpdateRequest updateRequest = new UpdateRequest(Constant.index,
+				Constant.product_type, p.getProductId()).doc(mapper.toJson(p));
+		//System.out.println(mapper.toJson(p));
+		try {
+			UpdateResponse r = client.update(updateRequest).get();
+//			 System.out.println(r.getIndex());
+//			 System.out.println(r.getType());
+//			 System.out.println(r.getVersion());
+//			 System.out.println(r.getGetResult());
 
 		} catch (InterruptedException e) {
 			e.printStackTrace();

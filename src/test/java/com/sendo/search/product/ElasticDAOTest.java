@@ -2,6 +2,7 @@ package com.sendo.search.product;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Random;
 
 import com.sendo.search.product.crawler.ProductCrawler;
 import com.sendo.search.product.elastic.ElasticProductDAO;
@@ -83,15 +84,19 @@ public class ElasticDAOTest {
 		ElasticProductDAO elastic = new ElasticProductDAO();
 		List<ScoreProduct> ps = elastic.getAllScoreProduct();
 		System.out.println(ps.size());
-		for (Product p : ps) {
+		//Random rand = new Random(System.currentTimeMillis());
+		for (ScoreProduct p : ps) {
+			//p.setBrand(Math.abs(rand.nextInt() % 2));
 			// System.out.println("--------------");
 			System.out.println(p.getProductId());
+			System.out.println(p.getTitle());
+			System.out.println(p.getBrand());
 			//System.out.println(p.getTitle());
 			// System.out.println(p.getDescription());
-			String newTitle = p.getTitle().replace(" " + p.getProductId(), "");
-			p.setTitle(newTitle);
+			//String newTitle = p.getTitle().replace(" " + p.getProductId(), "");
+			//p.setTitle(newTitle);
 			//System.out.println(p.getTitle());
-			elastic.updateProduct(p);
+			//elastic.updateScoreProduct(p);
 			
 		}
 	}
